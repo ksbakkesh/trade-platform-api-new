@@ -272,4 +272,50 @@ public class ExitStrategyService {
             return monitor(trade, position, ltp);
         }).toList();
     }
+
+    /**
+     * Force square-off at 3:15 PM — close all remaining quantity regardless of price.
+     */
+    @Transactional
+    public ExitResult forceSquareOff(Trade trade, Position position, BigDecimal currentLtp) {
+        log.info("[{}] Force square-off: symbol={} qty={}",
+                trade.getIndexName(), trade.getTradingSymbol(), position.getQuantityRemaining());
+
+        int qty = position.getQuantityRemaining();
+        BigDecimal pnl = currentLtp.subtract(trade.getEntryPrice())
+                .multiply(BigDecimal.valueOf(qty));
+
+        // Place sell order via order client
+        try {
+            com.tradingplatform.angelone.dto.PlaceOrderRequest req = new com.tradingplatform.angelone.dto.PlaceOrderRequest();
+            req.setTradingsymbol(trade.getTradingSymbol());
+            req.setSymboltoken(trade.getSymbolToken());
+            req.setTransactiontype("SELL");
+            req.setExchange("NFO");
+            req.setOrdertype("MARKET");
+            req.setProducttype("INTRADAY");
+            req.setDuration("DAY");
+            req.setQuantity(String.valueOf(qty));
+            req.setPrice("0");
+            orderClient.placeOrder(req);
+        } catch (Exception e) {
+            log.error("[{}] Force square-off order failed: {}", trade.getIndexName(), e.getMessage());
+        }
+
+        // Update position and trade status
+        position.setQuantityRemaining(0);
+        position.setCurrentLtp(currentLtp);
+        position.setUnrealizedPnl(BigDecimal.ZERO);
+        positionRepository.save(position);
+
+        trade.setStatus(TradeStatus.CLOSED);
+        trade.setExitPrice(currentLtp);
+        trade.setExitReason(com.tradingplatform.domain.enums.ExitReason.SQUARE_OFF);
+        trade.setRealizedPnl(pnl);
+        trade.setExitTime(java.time.Instant.now());
+        tradeRepository.save(trade);
+
+        return ExitResult.fullClose(ExitTrigger.NONE,
+                com.tradingplatform.domain.enums.ExitReason.SQUARE_OFF, currentLtp, qty, pnl, trade);
+    }
 }

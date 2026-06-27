@@ -9,14 +9,23 @@ import java.math.BigDecimal;
  * @param ltp               last traded price (= premium close of the 15-min candle)
  * @param currentVolume     volume of the current (just-closed) 15-min candle
  * @param previousVolume    volume of the previous 15-min candle (for 2× check)
- * @param rsi               RSI(14) of the option or underlying, depending on strategy config
+ * @param rsi               RSI(14) of the option or underlying
  * @param delta             option delta (0 to 1 for CE, -1 to 0 for PE, passed as absolute)
+ * @param tradingSymbol     Angel One trading symbol e.g. "NIFTY27JUN2424100CE"
+ * @param symbolToken       Angel One numeric instrument token
  */
 public record MarketSnapshot(
         BigDecimal ltp,
         Long currentVolume,
         Long previousVolume,
         BigDecimal rsi,
-        BigDecimal delta
+        BigDecimal delta,
+        String tradingSymbol,
+        String symbolToken
 ) {
+    /** Convenience constructor without symbol info (for backward compatibility) */
+    public MarketSnapshot(BigDecimal ltp, Long currentVolume, Long previousVolume,
+                           BigDecimal rsi, BigDecimal delta) {
+        this(ltp, currentVolume, previousVolume, rsi, delta, null, null);
+    }
 }

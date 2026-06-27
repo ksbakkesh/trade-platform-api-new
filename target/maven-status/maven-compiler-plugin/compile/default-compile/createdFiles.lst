@@ -57,6 +57,7 @@ com/tradingplatform/domain/enums/UserRole.class
 com/tradingplatform/angelone/dto/ProfileResponse.class
 com/tradingplatform/api/MarketOverviewController.class
 com/tradingplatform/config/AngelOneConfig.class
+com/tradingplatform/market/OptionDataService.class
 com/tradingplatform/api/TradeDashboardController$TradeSummary.class
 com/tradingplatform/reentry/ReEntryService.class
 com/tradingplatform/repository/FundManagementRepository.class
@@ -76,6 +77,7 @@ com/tradingplatform/domain/enums/ExitStrategyMode.class
 com/tradingplatform/domain/enums/TradeStatus.class
 com/tradingplatform/strategy/gann/GannRounding.class
 com/tradingplatform/reentry/ReEntryResult.class
+com/tradingplatform/scheduler/TradingScheduler.class
 com/tradingplatform/risk/RiskManagementService.class
 com/tradingplatform/domain/Position.class
 com/tradingplatform/repository/SystemLogRepository.class

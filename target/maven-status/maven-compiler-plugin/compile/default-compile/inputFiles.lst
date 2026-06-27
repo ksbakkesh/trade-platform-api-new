@@ -66,6 +66,7 @@
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/exit/ExitResult.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/exit/ExitStrategyService.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/exit/ExitTrigger.java
+/Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/market/OptionDataService.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/position/FundValidationResult.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/position/IndexLotSize.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/position/PositionSize.java
@@ -85,6 +86,7 @@
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/risk/IndianMarketClock.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/risk/RiskCheckResult.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/risk/RiskManagementService.java
+/Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/scheduler/TradingScheduler.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/security/EncryptedStringConverter.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/signal/EntryConditionChecker.java
 /Applications/codebase/trade-platform-api-new/src/main/java/com/tradingplatform/signal/EntryConditionResult.java
