@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/trading_platform
+    username: postgres
+    password: postgres

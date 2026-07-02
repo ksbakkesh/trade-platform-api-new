@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://pg-266e7eb0-ksbakkesh-0d1f.k.aivencloud.com:23592/defaultdb?sslmode=require
+    username: avnadmin
+    password: ${DB_PASSWORD_CLOUD:}
