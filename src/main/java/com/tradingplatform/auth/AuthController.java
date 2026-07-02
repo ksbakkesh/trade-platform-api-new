@@ -24,9 +24,12 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.tradingplatform.repository.UserRepository userRepository;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          com.tradingplatform.repository.UserRepository userRepository) {
         this.authService = authService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/login")
@@ -75,6 +78,21 @@ public class AuthController {
         ));
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileRequest req, Authentication auth) {
+        if (auth == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        try {
+            com.tradingplatform.domain.User user = userRepository.findByEmail(auth.getName())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            if (req.username() != null && !req.username().isBlank()) user.setUsername(req.username());
+            if (req.email() != null && !req.email().isBlank()) user.setEmail(req.email());
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest req,
                                              Authentication auth) {
@@ -120,6 +138,8 @@ public class AuthController {
             @NotBlank @Email String email,
             @NotBlank String password
     ) {}
+
+    public record ProfileRequest(String username, String email) {}
 
     public record RegisterRequest(
             @NotBlank String username,

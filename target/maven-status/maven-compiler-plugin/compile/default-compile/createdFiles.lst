@@ -1,5 +1,6 @@
 com/tradingplatform/angelone/AngelOneAuthClient$4.class
 com/tradingplatform/repository/RiskSettingsRepository.class
+com/tradingplatform/api/UserManagementController$UpdateRequest.class
 com/tradingplatform/strategy/gann/GannLevels.class
 com/tradingplatform/api/RiskSettingsController$RiskSettingsResponse.class
 com/tradingplatform/angelone/AngelOneAuthClient$1.class
@@ -23,6 +24,7 @@ com/tradingplatform/TradingPlatformApplication.class
 com/tradingplatform/repository/StrategySettingsRepository.class
 com/tradingplatform/exit/ExitResult$ExitAction.class
 com/tradingplatform/angelone/dto/QuoteResponse.class
+com/tradingplatform/auth/AuthController$ProfileRequest.class
 com/tradingplatform/position/PositionSize.class
 com/tradingplatform/controller/TradeExecutionTestController.class
 com/tradingplatform/config/CorsConfig.class
@@ -41,19 +43,24 @@ com/tradingplatform/angelone/AngelOneAuthClient.class
 com/tradingplatform/api/RiskSettingsController$RiskSettingsRequest.class
 com/tradingplatform/angelone/dto/OrderResponse.class
 com/tradingplatform/angelone/AngelOneAuthClient$2.class
+com/tradingplatform/repository/UserPermissionsRepository.class
 com/tradingplatform/signal/EntryConditionResult.class
 com/tradingplatform/trade/TradeExecutionService.class
 com/tradingplatform/repository/DailyPnlRepository.class
 com/tradingplatform/api/PositionDashboardController$PositionSummary.class
 com/tradingplatform/position/PositionSizingService.class
+com/tradingplatform/api/AdminBrokerController.class
 com/tradingplatform/signal/SignalResponse.class
 com/tradingplatform/notification/NotificationService.class
 com/tradingplatform/controller/ApiExceptionHandler.class
+com/tradingplatform/api/PermissionsController.class
 com/tradingplatform/angelone/dto/LoginResponseData.class
+com/tradingplatform/domain/UserPermissions.class
 com/tradingplatform/angelone/TotpGenerator.class
 com/tradingplatform/domain/RiskSettings.class
 com/tradingplatform/repository/BrokerAccountRepository.class
 com/tradingplatform/security/EncryptedStringConverter.class
+com/tradingplatform/angelone/AngelOneMarketClient$4.class
 com/tradingplatform/angelone/AngelOneAuthClient$3.class
 com/tradingplatform/exit/ExitTrigger.class
 com/tradingplatform/domain/enums/UserRole.class
@@ -89,6 +96,7 @@ com/tradingplatform/auth/AuthController$RegisterRequest.class
 com/tradingplatform/api/RiskDashboardController$DailyPnlResponse.class
 com/tradingplatform/controller/GannTestController.class
 com/tradingplatform/auth/AuthService$AuthException.class
+com/tradingplatform/api/AdminBrokerController$ConnectRequest.class
 com/tradingplatform/angelone/dto/RefreshTokenRequest.class
 com/tradingplatform/angelone/AngelOneMarketClient$2.class
 com/tradingplatform/angelone/dto/QuoteRequest.class
