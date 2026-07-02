@@ -4,6 +4,9 @@ import com.tradingplatform.angelone.AngelOneAuthClient;
 import com.tradingplatform.angelone.AngelOneMarketClient;
 import com.tradingplatform.angelone.dto.QuoteResponse;
 import com.tradingplatform.domain.BrokerAccount;
+import com.tradingplatform.domain.DailyOpenPrice;
+import com.tradingplatform.signal.MarketSnapshot;
+import com.tradingplatform.repository.DailyOpenPriceRepository;
 import com.tradingplatform.domain.Position;
 import com.tradingplatform.domain.Signal;
 import com.tradingplatform.domain.StrategySettings;
@@ -20,10 +23,8 @@ import com.tradingplatform.repository.PositionRepository;
 import com.tradingplatform.repository.StrategySettingsRepository;
 import com.tradingplatform.repository.TradeRepository;
 import com.tradingplatform.market.OptionDataService;
-import com.tradingplatform.notification.NotificationService;
 import com.tradingplatform.strategy.gann.GannCalculationService;
 import com.tradingplatform.strategy.gann.GannLevels;
-import com.tradingplatform.signal.MarketSnapshot;
 import com.tradingplatform.signal.SignalGenerationService;
 import com.tradingplatform.trade.TradeExecutionResult;
 import com.tradingplatform.trade.TradeExecutionService;
@@ -83,7 +84,7 @@ public class TradingScheduler {
     private final ReEntryService reEntryService;
     private final OptionDataService optionDataService;
     private final GannCalculationService gannCalculationService;
-    private final NotificationService notificationService;
+    private final DailyOpenPriceRepository dailyOpenPriceRepository;
 
     public TradingScheduler(BrokerAccountRepository brokerAccountRepository,
                              StrategySettingsRepository strategySettingsRepository,
@@ -97,7 +98,7 @@ public class TradingScheduler {
                              ReEntryService reEntryService,
                              OptionDataService optionDataService,
                              GannCalculationService gannCalculationService,
-                             NotificationService notificationService) {
+                             DailyOpenPriceRepository dailyOpenPriceRepository) {
         this.brokerAccountRepository = brokerAccountRepository;
         this.strategySettingsRepository = strategySettingsRepository;
         this.positionRepository = positionRepository;
@@ -110,7 +111,7 @@ public class TradingScheduler {
         this.reEntryService = reEntryService;
         this.optionDataService = optionDataService;
         this.gannCalculationService = gannCalculationService;
-        this.notificationService = notificationService;
+        this.dailyOpenPriceRepository = dailyOpenPriceRepository;
     }
 
     /**
@@ -181,11 +182,29 @@ public class TradingScheduler {
         BigDecimal niftySpot  = fetchSpotPrice("NSE", NIFTY_SPOT_TOKEN,  "NIFTY");
         BigDecimal sensexSpot = fetchSpotPrice("BSE", SENSEX_SPOT_TOKEN, "SENSEX");
 
-        // Step 4: cache open prices at 9:15 AM
+        // Step 4: cache open prices at 9:15 AM and save to DB
         if (isOpeningCandle) {
-            if (niftySpot  != null) openPriceCache.put(key(account.getId(), "NIFTY"),  niftySpot);
-            if (sensexSpot != null) openPriceCache.put(key(account.getId(), "SENSEX"), sensexSpot);
-            log.info("[Account {}] Open prices — NIFTY={} SENSEX={}", account.getId(), niftySpot, sensexSpot);
+            if (niftySpot != null) {
+                openPriceCache.put(key(account.getId(), "NIFTY"), niftySpot);
+                saveOpenPrice(account, "NIFTY", niftySpot, "AUTO");
+            }
+            if (sensexSpot != null) {
+                openPriceCache.put(key(account.getId(), "SENSEX"), sensexSpot);
+                saveOpenPrice(account, "SENSEX", sensexSpot, "AUTO");
+            }
+            log.info("[Account {}] Open prices captured — NIFTY={} SENSEX={}", account.getId(), niftySpot, sensexSpot);
+        } else {
+            // Load from DB if not in cache (e.g. after restart)
+            if (!openPriceCache.containsKey(key(account.getId(), "NIFTY"))) {
+                dailyOpenPriceRepository.findByBrokerAccountIdAndIndexNameAndTradeDate(
+                        account.getId(), "NIFTY", java.time.LocalDate.now())
+                        .ifPresent(p -> openPriceCache.put(key(account.getId(), "NIFTY"), p.getOpenPrice()));
+            }
+            if (!openPriceCache.containsKey(key(account.getId(), "SENSEX"))) {
+                dailyOpenPriceRepository.findByBrokerAccountIdAndIndexNameAndTradeDate(
+                        account.getId(), "SENSEX", java.time.LocalDate.now())
+                        .ifPresent(p -> openPriceCache.put(key(account.getId(), "SENSEX"), p.getOpenPrice()));
+            }
         }
 
         // Step 5: signal + trade for each index
@@ -252,7 +271,6 @@ public class TradingScheduler {
                     signal, account, snapshot.ltp(), capital, false, false);
 
             if (result.executed()) {
-                notificationService.tradePlaced(account, result.trade());
                 log.info("[Account {}][{}] ✅ Trade placed! orderId={} symbol={}",
                         account.getId(), index,
                         result.trade().getBrokerOrderId(),
@@ -397,5 +415,24 @@ public class TradingScheduler {
 
     private String key(Long accountId, String index) {
         return accountId + ":" + index;
+    }
+
+    private void saveOpenPrice(BrokerAccount account, String indexName,
+                                BigDecimal price, String source) {
+        try {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            DailyOpenPrice op = dailyOpenPriceRepository
+                    .findByBrokerAccountIdAndIndexNameAndTradeDate(account.getId(), indexName, today)
+                    .orElse(new DailyOpenPrice());
+            op.setBrokerAccount(account);
+            op.setIndexName(indexName);
+            op.setOpenPrice(price);
+            op.setTradeDate(today);
+            op.setFetchedAt(java.time.Instant.now());
+            op.setSource(source);
+            dailyOpenPriceRepository.save(op);
+        } catch (Exception e) {
+            log.warn("Failed to save open price for {}: {}", indexName, e.getMessage());
+        }
     }
 }
